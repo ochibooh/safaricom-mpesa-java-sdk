@@ -70,11 +70,7 @@ public class Mpesa {
 
     public static Mpesa getInstance() {
         if (Mpesa.mpesa == null) {
-            if (Mpesa.key != null && !Mpesa.key.isEmpty() && Mpesa.secret != null && !Mpesa.secret.isEmpty()) {
-                Mpesa.mpesa = new Mpesa(Mpesa.key, Mpesa.secret, Mpesa.environment);
-            } else {
-                Mpesa.mpesa = new Mpesa("", "");
-            }
+            Mpesa.mpesa = Mpesa.key != null && !Mpesa.key.isEmpty() && Mpesa.secret != null && !Mpesa.secret.isEmpty() ? new Mpesa(Mpesa.key, Mpesa.secret, Mpesa.environment) : new Mpesa(null, null);
         }
         return Mpesa.mpesa;
     }
