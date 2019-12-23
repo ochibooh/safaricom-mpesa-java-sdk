@@ -1,3 +1,3 @@
-# READ ME #
+# README #
 
 ## Safaricom MPESA Java SDK ##
