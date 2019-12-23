@@ -1,4 +1,5 @@
 *.iml
+.idea/*
 mpesa/*.iml
 mpesa/target/*
 demo/*.iml
