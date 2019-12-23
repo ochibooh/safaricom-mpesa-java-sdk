@@ -21,8 +21,13 @@ import lombok.Getter;
 @Getter
 class MpesaConfig {
     /* mpesa base urls */
-    private String sandboxBaseUrl = "";
-    private String productionBaseUrl = "";
+    private String sandboxBaseUrl = "https://sandbox.safaricom.co.ke/";
+    private String productionBaseUrl = "https://api.safaricom.co.ke/";
+
+    /* mpesa endpoints */
+    private String endPointAuth = "oauth/v1/generate";
+    private String endPointStkPush = "mpesa/stkpush/v1/processrequest";
+    private String endPointStkPushStatus = "mpesa/stkpushquery/v1/query";
 
     /* http connections */
     private int maxConnections = 400;

@@ -16,16 +16,33 @@
 
 package com.ochibooh.safaricom.mpesa;
 
+import com.google.gson.Gson;
+import com.ochibooh.safaricom.mpesa.model.request.MpesaStkPushRequest;
+import com.ochibooh.safaricom.mpesa.model.request.MpesaStkPushStatusRequest;
+import com.ochibooh.safaricom.mpesa.model.response.MpesaAuthResponse;
+import com.ochibooh.safaricom.mpesa.model.response.MpesaErrorResponse;
+import com.ochibooh.safaricom.mpesa.model.response.MpesaStkPushResponse;
+import com.ochibooh.safaricom.mpesa.model.response.MpesaStkPushStatusResponse;
+import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import lombok.NonNull;
-import lombok.extern.java.Log;
+import org.asynchttpclient.AsyncHttpClient;
 import org.asynchttpclient.AsyncHttpClientConfig;
 import org.asynchttpclient.DefaultAsyncHttpClientConfig;
+import org.asynchttpclient.RequestBuilder;
 
+import java.nio.charset.StandardCharsets;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Base64;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 
-@Log
+import static org.asynchttpclient.Dsl.asyncHttpClient;
+
 public class Mpesa {
 
     public enum Environment {
@@ -36,6 +53,10 @@ public class Mpesa {
         KENYA, TANZANIA, DRC, GHANA, EGYPT, LESOTHO, MOZAMBIQUE
     }
 
+    public enum StkPushType {
+        BUY_GOODS, PAY_BILL
+    }
+
     private static Environment environment = Environment.SANDBOX;
     private static Country country = Country.KENYA;
 
@@ -43,6 +64,8 @@ public class Mpesa {
     private static String secret = null;
     
     private static Mpesa mpesa = null;
+    private static String token = null;
+    private static Timestamp tokenExpiry = Timestamp.from(Instant.now());
 
     private MpesaConfig config = new MpesaConfig();
 
@@ -89,7 +112,7 @@ public class Mpesa {
 
     public static Mpesa getInstance() {
         if (Mpesa.mpesa == null) {
-            Mpesa.mpesa = Mpesa.key != null && !Mpesa.key.isEmpty() && Mpesa.secret != null && !Mpesa.secret.isEmpty() ? new Mpesa(Mpesa.key, Mpesa.secret, Mpesa.environment) : new Mpesa(null, null);
+            Mpesa.mpesa = Mpesa.key != null && !Mpesa.key.isEmpty() && Mpesa.secret != null && !Mpesa.secret.isEmpty() ? new Mpesa(Mpesa.key, Mpesa.secret, Mpesa.environment, Mpesa.country) : new Mpesa(null, null);
         }
         return Mpesa.mpesa;
     }
@@ -99,7 +122,7 @@ public class Mpesa {
             try {
                 this.sc = SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build();
             } catch (Exception e) {
-                log.log(Level.WARNING, String.format("Ssl default context error [ %s ]", e.getMessage()), e);
+                MpesaUtil.writeLog(Mpesa.environment, Level.WARNING, String.format("Ssl default context error [ %s ]", e.getMessage()), e);
             }
         }
         return new DefaultAsyncHttpClientConfig.Builder()
@@ -116,13 +139,58 @@ public class Mpesa {
         try {
             this.sc = sslContext;
         } catch (Exception e) {
-            log.log(Level.SEVERE, String.format("Ssl context error [ %s ]", e.getMessage()), e);
+            MpesaUtil.writeLog(Mpesa.environment, Level.SEVERE, String.format("Ssl context error [ %s ]", e.getMessage()), e);
         }
         return getInstance();
     }
 
+    private boolean tokenExpired() {
+        if (Mpesa.token == null) {
+            return true;
+        } else {
+            return Mpesa.tokenExpiry.before(Timestamp.from(Instant.now()));
+        }
+    }
+
+    private String getUrl(@NonNull String endpoint) {
+        return String.format("%s%s", Mpesa.environment == Environment.PRODUCTION ? config.getProductionBaseUrl() : config.getSandboxBaseUrl(), endpoint);
+    }
+
     private String authenticate() {
-        return "";
+        AtomicReference<String> res = new AtomicReference<>(null);
+        if (tokenExpired()) {
+            if (Mpesa.key != null && !Mpesa.key.isEmpty() && Mpesa.secret != null && !Mpesa.secret.isEmpty()) {
+                try (AsyncHttpClient client = asyncHttpClient(httpClientConfig())) {
+                    Gson gson = new Gson();
+                    RequestBuilder request = new RequestBuilder(HttpMethod.GET.name())
+                            .setUrl(getUrl(config.getEndPointAuth()))
+                            .addHeader("Authorization", String.format("Basic %s", Base64.getEncoder().encodeToString(String.format("%s:%s", Mpesa.key, Mpesa.secret).getBytes(StandardCharsets.ISO_8859_1))))
+                            .addHeader("Cache-Control", "no-cache")
+                            .addQueryParam("grant_type", "client_credentials");
+                    client.executeRequest(request.build())
+                            .toCompletableFuture()
+                            .thenApplyAsync(response -> {
+                                MpesaUtil.writeLog(Mpesa.environment, Level.INFO, String.format("Mpesa authenticate response [ statusCode=%s, statusMessage=%s, body=%s ]", response.getStatusCode(), response.getStatusText(), gson.toJson(gson.fromJson(response.getResponseBody(), Object.class))));
+                                AtomicReference<MpesaAuthResponse> authResponse = new AtomicReference<>(MpesaAuthResponse.builder().build());
+                                if (response.getStatusCode() == 200 && response.getResponseBody() != null && !response.getResponseBody().isEmpty()) {
+                                    authResponse.set(gson.fromJson(response.getResponseBody(), MpesaAuthResponse.class));
+                                    if (authResponse.get().getToken() != null && authResponse.get().getExpiry() > 20) {
+                                        Mpesa.token = authResponse.get().getToken();
+                                        Mpesa.tokenExpiry = Timestamp.from(Instant.now().plus((authResponse.get().getExpiry() - 20), ChronoUnit.SECONDS));
+                                        res.set(Mpesa.token);
+                                    }
+                                }
+                                return authResponse.get();
+                            })
+                            .thenAcceptAsync(u -> MpesaUtil.writeLog(Mpesa.environment, Level.FINE, String.valueOf(u))).join();
+                } catch (Exception e) {
+                    MpesaUtil.writeLog(Mpesa.environment, Level.SEVERE, String.format("Mpesa get authentication error [ %s ]", e.getMessage()), e);
+                }
+            }
+        } else {
+            res.set(Mpesa.token);
+        }
+        return res.get();
     }
 
     public String c2b() {
@@ -137,12 +205,100 @@ public class Mpesa {
         return "";
     }
 
-    public String stkPush() {
-        return "";
+    /*
+    * NOTE :: CustomerPayBillOnline - reference to be account number, CustomerBuyGoodsOnline to be reference number
+    * */
+    public MpesaStkPushResponse stkPush(@NonNull StkPushType type, @NonNull String shortCode, @NonNull String lipaOnlinePassKey, @NonNull String phone, @NonNull String callbackUrl, @NonNull String reference, String description) throws Exception {
+        AtomicReference<MpesaStkPushResponse> res = new AtomicReference<>(MpesaStkPushResponse.builder().build());
+        String token = authenticate();
+        if (token != null && !token.isEmpty()) {
+            try (AsyncHttpClient client = asyncHttpClient(httpClientConfig())) {
+                Gson gson = new Gson();
+                String pn = MpesaUtil.formatPhone(Mpesa.country, phone);
+                if (pn == null || pn.isEmpty()) {
+                    throw new Exception(String.format("Invalid phone number or country [ country=%s, phone=%s ]", Mpesa.country.name(), phone));
+                }
+                String timestamp = new SimpleDateFormat("yyyyMMddhhmmss").format(Timestamp.from(Instant.now()));
+                MpesaStkPushRequest body = MpesaStkPushRequest.builder()
+                        .shortCode(shortCode)
+                        .password(MpesaUtil.stkPushPassword(shortCode, lipaOnlinePassKey, timestamp))
+                        .timestamp(timestamp)
+                        .transactionType(type == StkPushType.PAY_BILL ? "CustomerPayBillOnline" : "CustomerBuyGoodsOnline")
+                        .amount(1)
+                        .partyA(pn)
+                        .partyB(shortCode)
+                        .phone(pn)
+                        .callbackUrl(callbackUrl)
+                        .reference(reference)
+                        .description(description)
+                        .build();
+                RequestBuilder request = new RequestBuilder(HttpMethod.POST.name())
+                        .setUrl(getUrl(config.getEndPointStkPush()))
+                        .addHeader("Authorization", String.format("Bearer %s", token))
+                        .addHeader("Content-Type", "application/json")
+                        .addHeader("Cache-Control", "no-cache")
+                        .setBody(gson.toJson(body));
+                client.executeRequest(request.build())
+                        .toCompletableFuture()
+                        .thenApplyAsync(response -> {
+                            MpesaUtil.writeLog(Mpesa.environment, Level.INFO, String.format("Mpesa STK Push response [ statusCode=%s, statusMessage=%s, body=%s ]", response.getStatusCode(), response.getStatusText(), gson.toJson(gson.fromJson(response.getResponseBody(), Object.class))));
+                            if (response.getStatusCode() == 200 && response.getResponseBody() != null && !response.getResponseBody().isEmpty()) {
+                                res.set(gson.fromJson(response.getResponseBody(), MpesaStkPushResponse.class));
+                            } else {
+                                MpesaErrorResponse errorResponse = gson.fromJson(response.getResponseBody(), MpesaErrorResponse.class);
+                                res.get().setMerchantRequestId(errorResponse.getRequestId());
+                                res.get().setResponseCode(errorResponse.getErrorCode());
+                                res.get().setResponseDescription(errorResponse.getErrorMessage());
+                            }
+                            return res.get();
+                        })
+                        .thenAcceptAsync(u -> MpesaUtil.writeLog(Mpesa.environment, Level.FINE, String.valueOf(u))).join();
+            }
+        } else {
+            throw new Exception("Invalid authorization token. Confirm if the consumer key and consumer secret provided are valid");
+        }
+        return res.get();
     }
 
-    public String stkPushStatus() {
-        return "";
+    public MpesaStkPushStatusResponse stkPushStatus(@NonNull String shortCode, @NonNull String lipaOnlinePassKey, @NonNull String checkoutRequestId) throws Exception {
+        AtomicReference<MpesaStkPushStatusResponse> res = new AtomicReference<>(MpesaStkPushStatusResponse.builder().build());
+        String token = authenticate();
+        if (token != null && !token.isEmpty()) {
+            try (AsyncHttpClient client = asyncHttpClient(httpClientConfig())) {
+                Gson gson = new Gson();
+                String timestamp = new SimpleDateFormat("yyyyMMddhhmmss").format(Timestamp.from(Instant.now()));
+                MpesaStkPushStatusRequest body = MpesaStkPushStatusRequest.builder()
+                        .shortCode(shortCode)
+                        .password(MpesaUtil.stkPushPassword(shortCode, lipaOnlinePassKey, timestamp))
+                        .timestamp(timestamp)
+                        .checkoutRequestId(checkoutRequestId)
+                        .build();
+                RequestBuilder request = new RequestBuilder(HttpMethod.POST.name())
+                        .setUrl(getUrl(config.getEndPointStkPushStatus()))
+                        .addHeader("Authorization", String.format("Bearer %s", token))
+                        .addHeader("Content-Type", "application/json")
+                        .addHeader("Cache-Control", "no-cache")
+                        .setBody(gson.toJson(body));
+                client.executeRequest(request.build())
+                        .toCompletableFuture()
+                        .thenApplyAsync(response -> {
+                            MpesaUtil.writeLog(Mpesa.environment, Level.INFO, String.format("Mpesa STK Push Status response [ statusCode=%s, statusMessage=%s, body=%s ]", response.getStatusCode(), response.getStatusText(), gson.toJson(gson.fromJson(response.getResponseBody(), Object.class))));
+                            if (response.getStatusCode() == 200 && response.getResponseBody() != null && !response.getResponseBody().isEmpty()) {
+                                res.set(gson.fromJson(response.getResponseBody(), MpesaStkPushStatusResponse.class));
+                            } else {
+                                MpesaErrorResponse errorResponse = gson.fromJson(response.getResponseBody(), MpesaErrorResponse.class);
+                                res.get().setMerchantRequestId(errorResponse.getRequestId());
+                                res.get().setResponseCode(errorResponse.getErrorCode());
+                                res.get().setResponseDescription(errorResponse.getErrorMessage());
+                            }
+                            return response.getResponseBody();
+                        })
+                        .thenAcceptAsync(u -> MpesaUtil.writeLog(Mpesa.environment, Level.FINE, String.valueOf(u))).join();
+            }
+        } else {
+            throw new Exception("Invalid authorization token. Confirm if the consumer key and consumer secret provided are valid");
+        }
+        return res.get();
     }
 
     public String reversal() {
@@ -150,7 +306,7 @@ public class Mpesa {
     }
 
     public String balance() {
-        return String.format("[ consumerKey=%s, consumerSecret=%s ]", Mpesa.key, Mpesa.secret);
+        return "";
     }
 
     public String registerUrl() {

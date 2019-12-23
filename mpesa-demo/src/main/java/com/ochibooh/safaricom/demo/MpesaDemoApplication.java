@@ -16,6 +16,8 @@
 
 package com.ochibooh.safaricom.demo;
 
+import com.ochibooh.safaricom.mpesa.Mpesa;
+import com.ochibooh.safaricom.mpesa.model.response.MpesaStkPushResponse;
 import lombok.extern.java.Log;
 
 import java.util.logging.Level;
@@ -24,5 +26,23 @@ import java.util.logging.Level;
 public class MpesaDemoApplication {
     public static void main(String[] args) {
         log.log(Level.INFO, "Mpesa Demo Initialized...");
+
+        try {
+            Mpesa.init("K5D6AaX0DqIaFlysMJBhL8klGouPQpVg", "d3qquYAPsQlS2mEZ");
+            MpesaStkPushResponse mpesaStkPushResponse = Mpesa.getInstance().stkPush(
+                    Mpesa.StkPushType.PAY_BILL,
+                    "174379",
+                    "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919",
+                    "0718058057",
+                    "https://7da4a70f.ngrok.io/collectionsRequestpay.php",
+                    "test",
+                    "one");
+            log.log(Level.INFO, mpesaStkPushResponse.toString());
+            Thread.sleep(10000);
+            log.log(Level.INFO, Mpesa.getInstance().stkPushStatus("174379", "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919", mpesaStkPushResponse.getCheckoutRequestId()).toString());
+            log.log(Level.INFO, Mpesa.getInstance().balance());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
