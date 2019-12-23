@@ -16,12 +16,9 @@
 
 package com.ochibooh.safaricom.demo;
 
-import com.ochibooh.safaricom.mpesa.Mpesa;
 import lombok.extern.java.Log;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-import java.util.logging.Level;
 
 @Log
 @SpringBootApplication
@@ -29,11 +26,5 @@ public class DemoApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(DemoApplication.class, args);
-
-        log.log(Level.INFO, Mpesa.init("init", "init").balance());
-
-        Mpesa mpesa = new Mpesa("new", "new", Mpesa.Environment.PRODUCTION);
-        log.log(Level.INFO, mpesa.balance());
-        log.log(Level.INFO, Mpesa.getInstance().balance());
     }
 }

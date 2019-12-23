@@ -52,14 +52,12 @@ public class Mpesa {
         Mpesa.setConfigs(consumerKey, consumerSecret, null);
     }
 
-    public static Mpesa init(@NonNull String consumerKey, @NonNull String consumerSecret, @NonNull Environment environment) {
+    public static void init(@NonNull String consumerKey, @NonNull String consumerSecret, @NonNull Environment environment) {
         Mpesa.mpesa = new Mpesa(consumerKey, consumerSecret, environment);
-        return getInstance();
     }
 
-    public static Mpesa init(@NonNull String consumerKey, @NonNull String consumerSecret) {
+    public static void init(@NonNull String consumerKey, @NonNull String consumerSecret) {
         Mpesa.mpesa = new Mpesa(consumerKey, consumerSecret, Environment.SANDBOX);
-        return getInstance();
     }
 
     private static void setConfigs(@NonNull String consumerKey, @NonNull String consumerSecret, Environment environment) {

@@ -84,7 +84,7 @@
 
     <modules>
         <module>mpesa</module>
-        <module>demo</module>
+        <module>mpesa-demo</module>
     </modules>
 
 </project>
