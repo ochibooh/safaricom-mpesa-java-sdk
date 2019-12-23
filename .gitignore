@@ -2,5 +2,5 @@
 .idea/*
 mpesa/*.iml
 mpesa/target/*
-demo/*.iml
-demo/target/*
+mpesa-demo/*.iml
+mpesa-demo/target/*
