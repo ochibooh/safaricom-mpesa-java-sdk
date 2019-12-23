@@ -16,7 +16,6 @@
 
 package com.ochibooh.safaricom.mpesa;
 
-import com.ochibooh.safaricom.mpesa.config.MpesaConfig;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import lombok.NonNull;

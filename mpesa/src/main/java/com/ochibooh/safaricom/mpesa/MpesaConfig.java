@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.ochibooh.safaricom.mpesa.config;
+package com.ochibooh.safaricom.mpesa;
 
 import lombok.Getter;
 
 @Getter
-public class MpesaConfig {
+class MpesaConfig {
     /* mpesa base urls */
     private String sandboxBaseUrl = "";
     private String productionBaseUrl = "";
