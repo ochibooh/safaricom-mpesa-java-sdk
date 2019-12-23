@@ -33,7 +33,12 @@ public class Mpesa {
         SANDBOX, PRODUCTION
     }
 
+    public enum Country {
+        KENYA, TANZANIA, DRC, GHANA, EGYPT, LESOTHO, MOZAMBIQUE
+    }
+
     private static Environment environment = Environment.SANDBOX;
+    private static Country country = Country.KENYA;
 
     private static String key = null;
     private static String secret = null;
@@ -44,24 +49,41 @@ public class Mpesa {
 
     private io.netty.handler.ssl.SslContext sc = null;
 
+    public Mpesa(@NonNull String consumerKey, @NonNull String consumerSecret, Environment environment, Country country) {
+        Mpesa.setConfigs(consumerKey, consumerSecret, environment, country);
+    }
+
     public Mpesa(@NonNull String consumerKey, @NonNull String consumerSecret, Environment environment) {
-        Mpesa.setConfigs(consumerKey, consumerSecret, environment);
+        Mpesa.setConfigs(consumerKey, consumerSecret, environment, null);
+    }
+
+    public Mpesa(@NonNull String consumerKey, @NonNull String consumerSecret, Country country) {
+        Mpesa.setConfigs(consumerKey, consumerSecret, null, country);
     }
 
     public Mpesa(@NonNull String consumerKey, @NonNull String consumerSecret) {
-        Mpesa.setConfigs(consumerKey, consumerSecret, null);
+        Mpesa.setConfigs(consumerKey, consumerSecret, null, null);
+    }
+
+    public static void init(@NonNull String consumerKey, @NonNull String consumerSecret, @NonNull Environment environment, @NonNull Country country) {
+        Mpesa.mpesa = new Mpesa(consumerKey, consumerSecret, environment, country);
     }
 
     public static void init(@NonNull String consumerKey, @NonNull String consumerSecret, @NonNull Environment environment) {
-        Mpesa.mpesa = new Mpesa(consumerKey, consumerSecret, environment);
+        Mpesa.mpesa = new Mpesa(consumerKey, consumerSecret, environment, Country.KENYA);
+    }
+
+    public static void init(@NonNull String consumerKey, @NonNull String consumerSecret, @NonNull Country country) {
+        Mpesa.mpesa = new Mpesa(consumerKey, consumerSecret, Environment.SANDBOX, country);
     }
 
     public static void init(@NonNull String consumerKey, @NonNull String consumerSecret) {
-        Mpesa.mpesa = new Mpesa(consumerKey, consumerSecret, Environment.SANDBOX);
+        Mpesa.mpesa = new Mpesa(consumerKey, consumerSecret, Environment.SANDBOX, Country.KENYA);
     }
 
-    private static void setConfigs(@NonNull String consumerKey, @NonNull String consumerSecret, Environment environment) {
+    private static void setConfigs(@NonNull String consumerKey, @NonNull String consumerSecret, Environment environment, Country country) {
         Mpesa.environment = environment != null ? environment : Environment.SANDBOX;
+        Mpesa.country = country != null ? country : Country.KENYA;
         Mpesa.key = consumerKey;
         Mpesa.secret = consumerSecret;
     }
