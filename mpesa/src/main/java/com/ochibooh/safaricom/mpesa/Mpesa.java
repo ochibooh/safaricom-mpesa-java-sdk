@@ -38,6 +38,7 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Base64;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 
@@ -208,7 +209,8 @@ public class Mpesa {
     /*
     * NOTE :: CustomerPayBillOnline - reference to be account number, CustomerBuyGoodsOnline to be reference number
     * */
-    public MpesaStkPushResponse stkPush(@NonNull StkPushType type, @NonNull String shortCode, @NonNull String lipaOnlinePassKey, @NonNull String phone, @NonNull String callbackUrl, @NonNull String reference, String description) throws Exception {
+    public CompletableFuture<MpesaStkPushResponse> stkPush(@NonNull StkPushType type, @NonNull String shortCode, @NonNull String lipaOnlinePassKey, @NonNull String phone, @NonNull String callbackUrl, @NonNull String reference,
+    String description) throws Exception {
         AtomicReference<MpesaStkPushResponse> res = new AtomicReference<>(MpesaStkPushResponse.builder().build());
         String token = authenticate();
         if (token != null && !token.isEmpty()) {
@@ -257,10 +259,10 @@ public class Mpesa {
         } else {
             throw new Exception("Invalid authorization token. Confirm if the consumer key and consumer secret provided are valid");
         }
-        return res.get();
+        return CompletableFuture.supplyAsync(res::get);
     }
 
-    public MpesaStkPushStatusResponse stkPushStatus(@NonNull String shortCode, @NonNull String lipaOnlinePassKey, @NonNull String checkoutRequestId) throws Exception {
+    public CompletableFuture<MpesaStkPushStatusResponse> stkPushStatus(@NonNull String shortCode, @NonNull String lipaOnlinePassKey, @NonNull String checkoutRequestId) throws Exception {
         AtomicReference<MpesaStkPushStatusResponse> res = new AtomicReference<>(MpesaStkPushStatusResponse.builder().build());
         String token = authenticate();
         if (token != null && !token.isEmpty()) {
@@ -298,7 +300,7 @@ public class Mpesa {
         } else {
             throw new Exception("Invalid authorization token. Confirm if the consumer key and consumer secret provided are valid");
         }
-        return res.get();
+        return CompletableFuture.supplyAsync(res::get);
     }
 
     public String reversal() {

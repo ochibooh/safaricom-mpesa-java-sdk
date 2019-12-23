@@ -36,10 +36,11 @@ public class MpesaDemoApplication {
                     "0718058057",
                     "https://7da4a70f.ngrok.io/collectionsRequestpay.php",
                     "test",
-                    "one");
+                    "one")
+                    .join();
             log.log(Level.INFO, mpesaStkPushResponse.toString());
             Thread.sleep(10000);
-            log.log(Level.INFO, Mpesa.getInstance().stkPushStatus("174379", "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919", mpesaStkPushResponse.getCheckoutRequestId()).toString());
+            log.log(Level.INFO, Mpesa.getInstance().stkPushStatus("174379", "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919", mpesaStkPushResponse.getCheckoutRequestId()).join().toString());
             log.log(Level.INFO, Mpesa.getInstance().balance());
         } catch (Exception e) {
             e.printStackTrace();
