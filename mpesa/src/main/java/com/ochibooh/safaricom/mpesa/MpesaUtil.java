@@ -48,21 +48,10 @@ class MpesaUtil {
         }
     }
 
-    public static String formatPhone(@NonNull Mpesa.Country country, @NonNull String phone) throws Exception {
+    public static String formatPhone(@NonNull String country, @NonNull String phone) throws Exception {
         AtomicReference<String> res = new AtomicReference<>(null);
-        String cc;
-        switch (country) {
-            case TANZANIA: cc = "TZ"; break;
-            case DRC: cc = "CD"; break;
-            case GHANA: cc = "GH"; break;
-            case EGYPT: cc = "EG"; break;
-            case LESOTHO: cc = "LS"; break;
-            case MOZAMBIQUE: cc = "MZ"; break;
-            case KENYA:
-            default: cc = "KE";
-        }
         PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
-        Phonenumber.PhoneNumber pn = phoneUtil.parse(phone, cc);
+        Phonenumber.PhoneNumber pn = phoneUtil.parse(phone, country);
         if (phoneUtil.isValidNumber(pn)) {
             res.set(phoneUtil.format(pn, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL).replace("+", "").replaceAll(" ", ""));
         }

@@ -26,7 +26,7 @@ import java.util.logging.Level;
 public class MpesaTests {
     @Before
     public void init() {
-        Mpesa.init("K5D6AaX0DqIaFlysMJBhL8klGouPQpVg", "d3qquYAPsQlS2mEZ", Mpesa.Environment.SANDBOX, Mpesa.Country.KENYA);
+        Mpesa.init("K5D6AaX0DqIaFlysMJBhL8klGouPQpVg", "d3qquYAPsQlS2mEZ", Mpesa.Environment.SANDBOX);
     }
 
     @Test

@@ -50,16 +50,11 @@ public class Mpesa {
         SANDBOX, PRODUCTION
     }
 
-    public enum Country {
-        KENYA, TANZANIA, DRC, GHANA, EGYPT, LESOTHO, MOZAMBIQUE
-    }
-
     public enum StkPushType {
         BUY_GOODS, PAY_BILL
     }
 
     private static Environment environment = Environment.SANDBOX;
-    private static Country country = Country.KENYA;
 
     private static String key = null;
     private static String secret = null;
@@ -72,48 +67,31 @@ public class Mpesa {
 
     private io.netty.handler.ssl.SslContext sc = null;
 
-    public Mpesa(@NonNull String consumerKey, @NonNull String consumerSecret, Environment environment, Country country) {
-        Mpesa.setConfigs(consumerKey, consumerSecret, environment, country);
-    }
-
     public Mpesa(@NonNull String consumerKey, @NonNull String consumerSecret, Environment environment) {
-        Mpesa.setConfigs(consumerKey, consumerSecret, environment, null);
-    }
-
-    public Mpesa(@NonNull String consumerKey, @NonNull String consumerSecret, Country country) {
-        Mpesa.setConfigs(consumerKey, consumerSecret, null, country);
+        Mpesa.setConfigs(consumerKey, consumerSecret, environment);
     }
 
     public Mpesa(@NonNull String consumerKey, @NonNull String consumerSecret) {
-        Mpesa.setConfigs(consumerKey, consumerSecret, null, null);
-    }
-
-    public static void init(@NonNull String consumerKey, @NonNull String consumerSecret, @NonNull Environment environment, @NonNull Country country) {
-        Mpesa.mpesa = new Mpesa(consumerKey, consumerSecret, environment, country);
+        Mpesa.setConfigs(consumerKey, consumerSecret, null);
     }
 
     public static void init(@NonNull String consumerKey, @NonNull String consumerSecret, @NonNull Environment environment) {
-        Mpesa.mpesa = new Mpesa(consumerKey, consumerSecret, environment, Country.KENYA);
-    }
-
-    public static void init(@NonNull String consumerKey, @NonNull String consumerSecret, @NonNull Country country) {
-        Mpesa.mpesa = new Mpesa(consumerKey, consumerSecret, Environment.SANDBOX, country);
+        Mpesa.mpesa = new Mpesa(consumerKey, consumerSecret, environment);
     }
 
     public static void init(@NonNull String consumerKey, @NonNull String consumerSecret) {
-        Mpesa.mpesa = new Mpesa(consumerKey, consumerSecret, Environment.SANDBOX, Country.KENYA);
+        Mpesa.mpesa = new Mpesa(consumerKey, consumerSecret, Environment.SANDBOX);
     }
 
-    private static void setConfigs(@NonNull String consumerKey, @NonNull String consumerSecret, Environment environment, Country country) {
+    private static void setConfigs(@NonNull String consumerKey, @NonNull String consumerSecret, Environment environment) {
         Mpesa.environment = environment != null ? environment : Environment.SANDBOX;
-        Mpesa.country = country != null ? country : Country.KENYA;
         Mpesa.key = consumerKey;
         Mpesa.secret = consumerSecret;
     }
 
     public static Mpesa getInstance() {
         if (Mpesa.mpesa == null) {
-            Mpesa.mpesa = Mpesa.key != null && !Mpesa.key.isEmpty() && Mpesa.secret != null && !Mpesa.secret.isEmpty() ? new Mpesa(Mpesa.key, Mpesa.secret, Mpesa.environment, Mpesa.country) : new Mpesa(null, null);
+            Mpesa.mpesa = Mpesa.key != null && !Mpesa.key.isEmpty() && Mpesa.secret != null && !Mpesa.secret.isEmpty() ? new Mpesa(Mpesa.key, Mpesa.secret, Mpesa.environment) : new Mpesa(null, null);
         }
         return Mpesa.mpesa;
     }
@@ -216,9 +194,9 @@ public class Mpesa {
         if (token != null && !token.isEmpty()) {
             try (AsyncHttpClient client = asyncHttpClient(httpClientConfig())) {
                 Gson gson = new Gson();
-                String pn = MpesaUtil.formatPhone(Mpesa.country, phone);
+                String pn = MpesaUtil.formatPhone("KE", phone);
                 if (pn == null || pn.isEmpty()) {
-                    throw new Exception(String.format("Invalid phone number or country [ country=%s, phone=%s ]", Mpesa.country.name(), phone));
+                    throw new Exception(String.format("Invalid phone number [ country=KE, phone=%s ]", phone));
                 }
                 String timestamp = new SimpleDateFormat("yyyyMMddhhmmss").format(Timestamp.from(Instant.now()));
                 MpesaStkPushRequest body = MpesaStkPushRequest.builder()
