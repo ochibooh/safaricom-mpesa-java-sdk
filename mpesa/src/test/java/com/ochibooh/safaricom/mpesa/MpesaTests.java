@@ -26,11 +26,33 @@ import java.util.logging.Level;
 public class MpesaTests {
     @Before
     public void init() {
-        Mpesa.init("test", "one", Mpesa.Environment.SANDBOX);
+        Mpesa.init("K5D6AaX0DqIaFlysMJBhL8klGouPQpVg", "d3qquYAPsQlS2mEZ", Mpesa.Environment.SANDBOX, Mpesa.Country.KENYA);
     }
 
     @Test
-    public void testBalance() {
-        log.log(Level.INFO, Mpesa.getInstance().balance());
+    public void testStk() {
+        try {
+            Mpesa.getInstance().stkPush(
+                    Mpesa.StkPushType.PAY_BILL,
+                    "174379",
+                    "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919",
+                    "0718058057",
+                    "https://7da4a70f.ngrok.io/collectionsRequestpay.php",
+                    "test",
+                    "one")
+                    .thenApplyAsync(response -> {
+                        try {
+                            log.log(Level.INFO, response.toString());
+                            Thread.sleep(45000);
+                            log.log(Level.INFO, Mpesa.getInstance().stkPushStatus("174379", "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919", response.getCheckoutRequestId()).join().toString());
+                        } catch (Exception e) {
+                            log.log(Level.SEVERE, e.getMessage(), e);
+                        }
+                        return response;
+                    })
+                    .join();
+        } catch (Exception e) {
+            log.log(Level.SEVERE, e.getMessage(), e);
+        }
     }
 }

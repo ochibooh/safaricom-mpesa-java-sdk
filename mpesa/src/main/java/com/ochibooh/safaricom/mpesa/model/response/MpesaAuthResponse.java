@@ -22,7 +22,6 @@ import lombok.*;
 import java.io.Serializable;
 
 @ToString
-@Setter
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor

@@ -17,7 +17,6 @@
 package com.ochibooh.safaricom.demo;
 
 import com.ochibooh.safaricom.mpesa.Mpesa;
-import com.ochibooh.safaricom.mpesa.model.response.MpesaStkPushResponse;
 import lombok.extern.java.Log;
 
 import java.util.logging.Level;
@@ -29,7 +28,7 @@ public class MpesaDemoApplication {
 
         try {
             Mpesa.init("K5D6AaX0DqIaFlysMJBhL8klGouPQpVg", "d3qquYAPsQlS2mEZ");
-            MpesaStkPushResponse mpesaStkPushResponse = Mpesa.getInstance().stkPush(
+            Mpesa.getInstance().stkPush(
                     Mpesa.StkPushType.PAY_BILL,
                     "174379",
                     "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919",
@@ -37,13 +36,20 @@ public class MpesaDemoApplication {
                     "https://7da4a70f.ngrok.io/collectionsRequestpay.php",
                     "test",
                     "one")
+                    .thenApplyAsync(response -> {
+                        try {
+                            log.log(Level.INFO, response.toString());
+                            Thread.sleep(10000);
+                            log.log(Level.INFO, Mpesa.getInstance().stkPushStatus("174379", "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919", response.getCheckoutRequestId()).join().toString());
+                        } catch (Exception e) {
+                            log.log(Level.SEVERE, e.getMessage(), e);
+                        }
+                        return response;
+                    })
                     .join();
-            log.log(Level.INFO, mpesaStkPushResponse.toString());
-            Thread.sleep(10000);
-            log.log(Level.INFO, Mpesa.getInstance().stkPushStatus("174379", "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919", mpesaStkPushResponse.getCheckoutRequestId()).join().toString());
             log.log(Level.INFO, Mpesa.getInstance().balance());
         } catch (Exception e) {
-            e.printStackTrace();
+            log.log(Level.SEVERE, e.getMessage(), e);
         }
     }
 }

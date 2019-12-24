@@ -248,9 +248,7 @@ public class Mpesa {
                                 res.set(gson.fromJson(response.getResponseBody(), MpesaStkPushResponse.class));
                             } else {
                                 MpesaErrorResponse errorResponse = gson.fromJson(response.getResponseBody(), MpesaErrorResponse.class);
-                                res.get().setMerchantRequestId(errorResponse.getRequestId());
-                                res.get().setResponseCode(errorResponse.getErrorCode());
-                                res.get().setResponseDescription(errorResponse.getErrorMessage());
+                                res.set(MpesaStkPushResponse.builder().merchantRequestId(errorResponse.getRequestId()).responseCode(errorResponse.getErrorCode()).responseDescription(errorResponse.getErrorMessage()).build());
                             }
                             return res.get();
                         })
@@ -289,9 +287,7 @@ public class Mpesa {
                                 res.set(gson.fromJson(response.getResponseBody(), MpesaStkPushStatusResponse.class));
                             } else {
                                 MpesaErrorResponse errorResponse = gson.fromJson(response.getResponseBody(), MpesaErrorResponse.class);
-                                res.get().setMerchantRequestId(errorResponse.getRequestId());
-                                res.get().setResponseCode(errorResponse.getErrorCode());
-                                res.get().setResponseDescription(errorResponse.getErrorMessage());
+                                res.set(MpesaStkPushStatusResponse.builder().merchantRequestId(errorResponse.getRequestId()).responseCode(errorResponse.getErrorCode()).responseDescription(errorResponse.getErrorMessage()).build());
                             }
                             return response.getResponseBody();
                         })
