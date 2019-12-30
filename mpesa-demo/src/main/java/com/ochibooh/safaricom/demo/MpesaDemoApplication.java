@@ -18,8 +18,10 @@ package com.ochibooh.safaricom.demo;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.web.reactive.config.EnableWebFlux;
 
-@SpringBootApplication
+@EnableWebFlux
+@SpringBootApplication(scanBasePackages = "com.ochibooh.safaricom")
 public class MpesaDemoApplication {
     public static void main(String[] args) {
         SpringApplication.run(MpesaDemoApplication.class, args);
