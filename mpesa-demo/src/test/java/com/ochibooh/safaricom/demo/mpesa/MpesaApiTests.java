@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019
+ * Copyright (c) 2020
  *     Phelix Ochieng(Ochibooh)
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ public class MpesaApiTests {
                     "174379",
                     "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919",
                     "0718058057",
-                    "https://3ecbeeef.ngrok.io/stk/callback",
+                    "https://dc55dcec.ngrok.io/stk/callback",
                     "test",
                     "one")
                     .thenApplyAsync(response -> {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019
+ * Copyright (c) 2020
  *     Phelix Ochieng(Ochibooh)
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -221,7 +221,8 @@ public class Mpesa {
                 client.executeRequest(request.build())
                         .toCompletableFuture()
                         .thenApplyAsync(response -> {
-                            MpesaUtil.writeLog(Mpesa.environment, Level.INFO, String.format("Mpesa STK Push response [ statusCode=%s, statusMessage=%s, body=%s ]", response.getStatusCode(), response.getStatusText(), gson.toJson(gson.fromJson(response.getResponseBody(), Object.class))));
+                            MpesaUtil.writeLog(Mpesa.environment, Level.INFO, String.format("Mpesa Stk Push response [ statusCode=%s, statusMessage=%s, body=%s ]", response.getStatusCode(), response.getStatusText(),
+                                    gson.toJson(gson.fromJson(response.getResponseBody(), Object.class))));
                             if (response.getStatusCode() == 200 && response.getResponseBody() != null && !response.getResponseBody().isEmpty()) {
                                 res.set(gson.fromJson(response.getResponseBody(), MpesaStkPushResponse.class));
                             } else {
@@ -260,7 +261,8 @@ public class Mpesa {
                 client.executeRequest(request.build())
                         .toCompletableFuture()
                         .thenApplyAsync(response -> {
-                            MpesaUtil.writeLog(Mpesa.environment, Level.INFO, String.format("Mpesa STK Push Status response [ statusCode=%s, statusMessage=%s, body=%s ]", response.getStatusCode(), response.getStatusText(), gson.toJson(gson.fromJson(response.getResponseBody(), Object.class))));
+                            MpesaUtil.writeLog(Mpesa.environment, Level.INFO, String.format("Mpesa Stk Push Status response [ statusCode=%s, statusMessage=%s, body=%s ]", response.getStatusCode(), response.getStatusText(),
+                                    gson.toJson(gson.fromJson(response.getResponseBody(), Object.class))));
                             if (response.getStatusCode() == 200 && response.getResponseBody() != null && !response.getResponseBody().isEmpty()) {
                                 res.set(gson.fromJson(response.getResponseBody(), MpesaStkPushStatusResponse.class));
                             } else {
