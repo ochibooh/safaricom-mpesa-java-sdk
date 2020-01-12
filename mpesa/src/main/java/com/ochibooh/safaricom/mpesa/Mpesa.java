@@ -313,7 +313,7 @@ public class Mpesa {
                 Gson gson = new Gson();
                 MpesaAccountBalanceRequest body = MpesaAccountBalanceRequest.builder()
                         .initiator(initiatorName)
-                        .credential(MpesaUtil.initiatorCredential(mpesaPublicCertificate, initiatorPassword))
+                        .credential(MpesaUtil.initiatorCredentials(mpesaPublicCertificate, initiatorPassword))
                         .commandId("AccountBalance")
                         .partyA(shortCode)
                         .identifierType(identifierType == IdentifierType.MSISDN ? 0 : identifierType == IdentifierType.TILL_NUMBER ? 1 : identifierType == IdentifierType.ORGANISATION_SHORT_CODE ? 4 : 99)
