@@ -92,13 +92,37 @@ public class MpesaApiTests {
         try {
             Mpesa.getInstance().balance(
                     new File("/media/ochibooh/data/projects/open-source/safaricom-mpesa/misc/safaricom-mpesa-public-key.cer"),
-                    "ochibooh",
-                    "Ochibooh1994",
-                    "600432",
+                    "testapi113",
+                    "Safaricom007@",
+                    "603040",
                     Mpesa.IdentifierType.ORGANISATION_SHORT_CODE,
                     "https://51efb1a9.ngrok.io/account/timeout",
                     "https://51efb1a9.ngrok.io/account/result",
                     "This is just test")
+                    .thenApplyAsync(response -> {
+                        log.log(Level.INFO, response.toString());
+                        return response;
+                    })
+                    .join();
+        } catch (Exception e) {
+            log.log(Level.SEVERE, e.getMessage(), e);
+        }
+    }
+
+    @Test
+    public void testTransactionStatus() {
+        try {
+            Mpesa.getInstance().transactionStatus(
+                    new File("/media/ochibooh/data/projects/open-source/safaricom-mpesa/misc/safaricom-mpesa-public-key.cer"),
+                    "testapi113",
+                    "Safaricom007@",
+                    "OAB8B4AHGA",
+                    "0718058057",
+                    Mpesa.IdentifierType.MSISDN,
+                    "https://51efb1a9.ngrok.io/transactionStatus/timeout",
+                    "https://51efb1a9.ngrok.io/transactionStatus/result",
+                    "This is just test",
+                    "This is just optional")
                     .thenApplyAsync(response -> {
                         log.log(Level.INFO, response.toString());
                         return response;

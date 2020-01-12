@@ -29,6 +29,7 @@ class MpesaConfig {
     private String endpointStkPush = "mpesa/stkpush/v1/processrequest";
     private String endpointStkPushStatus = "mpesa/stkpushquery/v1/query";
     private String endpointAccountBalance = "mpesa/accountbalance/v1/query";
+    private String endpointTransactionStatus = "mpesa/transactionstatus/v1/query";
 
     /* http connections */
     private int maxConnections = 400;

@@ -20,6 +20,7 @@ import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
 import lombok.NonNull;
 import lombok.extern.java.Log;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import javax.crypto.Cipher;
 import java.io.File;
@@ -81,7 +82,7 @@ class MpesaUtil {
     }
 
     public static String initiatorCredentials(@NonNull File mpesaCertificatePath, @NonNull String password) throws Exception {
-        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+        Security.addProvider(new BouncyCastleProvider());
         Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding", "BC");
         FileInputStream fin = new FileInputStream(mpesaCertificatePath);
         X509Certificate certificate = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(fin);

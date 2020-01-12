@@ -95,4 +95,34 @@ public class MpesaCallbackHandler {
         }
         return Mono.empty();
     }
+
+    @RequestMapping(
+            path = {"/transactionStatus/result"},
+            method = {RequestMethod.POST},
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public Mono<ResponseEntity<?>> transactionStatusResult(
+            @RequestBody(required = false) String body
+    ){
+        if (body != null && !body.isEmpty()) {
+            log.log(Level.INFO, String.format("Mpesa Transaction Status Result body [ %s ]", body));
+        }
+        return Mono.empty();
+    }
+
+    @RequestMapping(
+            path = {"/transactionStatus/timeout"},
+            method = {RequestMethod.POST},
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public Mono<ResponseEntity<?>> transactionStatusTimeout(
+            @RequestBody(required = false) String body
+    ){
+        if (body != null && !body.isEmpty()) {
+            log.log(Level.INFO, String.format("Mpesa Transaction Status Timeout body [ %s ]", body));
+        }
+        return Mono.empty();
+    }
 }
