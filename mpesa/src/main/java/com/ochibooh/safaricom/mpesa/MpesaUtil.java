@@ -62,6 +62,7 @@ class MpesaUtil {
             case MSISDN: res.set(1); break;
             case TILL_NUMBER: res.set(2); break;
             case ORGANISATION_SHORT_CODE: res.set(4); break;
+            case RECEIVER_ORGANISATION_IDENTIFIER_ON_MPESA: res.set(11); break;
             default: res.set(99); break;
         }
         return res.get();

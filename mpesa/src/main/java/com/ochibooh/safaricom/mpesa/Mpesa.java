@@ -17,10 +17,7 @@
 package com.ochibooh.safaricom.mpesa;
 
 import com.google.gson.Gson;
-import com.ochibooh.safaricom.mpesa.model.request.MpesaAccountBalanceRequest;
-import com.ochibooh.safaricom.mpesa.model.request.MpesaStkPushRequest;
-import com.ochibooh.safaricom.mpesa.model.request.MpesaStkPushStatusRequest;
-import com.ochibooh.safaricom.mpesa.model.request.MpesaTransactionStatusRequest;
+import com.ochibooh.safaricom.mpesa.model.request.*;
 import com.ochibooh.safaricom.mpesa.model.response.*;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.ssl.SslContextBuilder;
@@ -55,7 +52,7 @@ public class Mpesa {
     }
 
     public enum IdentifierType {
-        MSISDN, TILL_NUMBER, ORGANISATION_SHORT_CODE
+        MSISDN, TILL_NUMBER, ORGANISATION_SHORT_CODE, RECEIVER_ORGANISATION_IDENTIFIER_ON_MPESA
     }
 
     private static Environment environment = Environment.SANDBOX;
@@ -294,8 +291,59 @@ public class Mpesa {
         return CompletableFuture.supplyAsync(res::get);
     }
 
-    public String reversal() {
-        return "";
+    public CompletableFuture<MpesaReversalResponse> reversal(
+            @NonNull File mpesaPublicCertificate,
+            @NonNull String initiatorName,
+            @NonNull String initiatorPassword,
+            @NonNull String transactionId,
+            @NonNull Integer amount,
+            @NonNull String shortCode,
+            @NonNull IdentifierType identifierType,
+            @NonNull String queueTimeoutUrl,
+            @NonNull String resultUrl,
+            @NonNull String description,
+            String occasion) throws Exception {
+        AtomicReference<MpesaReversalResponse> res = new AtomicReference<>(MpesaReversalResponse.builder().build());
+        String token = authenticate();
+        if (token != null && !token.isEmpty()) {
+            try (AsyncHttpClient client = asyncHttpClient(httpClientConfig())) {
+                Gson gson = new Gson();
+                MpesaReversalRequest body = MpesaReversalRequest.builder()
+                        .initiator(initiatorName)
+                        .credential(MpesaUtil.initiatorCredentials(mpesaPublicCertificate, initiatorPassword))
+                        .commandId("TransactionReversal")
+                        .transactionId(transactionId)
+                        .amount(amount)
+                        .receiverParty(shortCode)
+                        .identifierType(MpesaUtil.getIdentifierType(identifierType))
+                        .description(description)
+                        .queueTimeoutUrl(queueTimeoutUrl)
+                        .resultUrl(resultUrl)
+                        .build();
+                if (occasion != null && !occasion.isEmpty()) {
+                    body.setOccasion(occasion);
+                }
+                RequestBuilder request = new RequestBuilder(HttpMethod.POST.name())
+                        .setUrl(getUrl(config.getEndpointAccountBalance()))
+                        .addHeader("Authorization", String.format("Bearer %s", token))
+                        .addHeader("Content-Type", "application/json")
+                        .addHeader("Cache-Control", "no-cache")
+                        .setBody(gson.toJson(body));
+                MpesaUtil.writeLog(Mpesa.environment, Level.INFO, body.toString());
+                client.executeRequest(request.build())
+                        .toCompletableFuture()
+                        .thenApplyAsync(response -> {
+                            MpesaUtil.writeLog(Mpesa.environment, Level.INFO, String.format("Mpesa Reversal response [ statusCode=%s, statusMessage=%s, body=%s ]", response.getStatusCode(), response.getStatusText(),
+                                    gson.toJson(gson.fromJson(response.getResponseBody(), Object.class))));
+                            return res.get();
+                        })
+                        .thenAcceptAsync(u -> MpesaUtil.writeLog(Mpesa.environment, Level.FINE, String.valueOf(u))).join();
+            }
+
+        } else {
+            throw new Exception("Invalid authorization token. Confirm if the consumer key and consumer secret provided are valid");
+        }
+        return CompletableFuture.supplyAsync(res::get);
     }
 
     public CompletableFuture<MpesaAccountBalanceResponse> balance(

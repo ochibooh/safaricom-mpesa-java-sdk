@@ -132,4 +132,29 @@ public class MpesaApiTests {
             log.log(Level.SEVERE, e.getMessage(), e);
         }
     }
+
+    @Test
+    public void testReversal() {
+        try {
+            Mpesa.getInstance().reversal(
+                    new File("/media/ochibooh/data/projects/open-source/safaricom-mpesa/misc/safaricom-mpesa-public-key.cer"),
+                    "testapi113",
+                    "Safaricom007@",
+                    "OAB8B4AHGA",
+                    1,
+                    "174379",
+                    Mpesa.IdentifierType.RECEIVER_ORGANISATION_IDENTIFIER_ON_MPESA,
+                    "https://51efb1a9.ngrok.io/reversal/timeout",
+                    "https://51efb1a9.ngrok.io/reversal/result",
+                    "This is just test",
+                    "This is just optional")
+                    .thenApplyAsync(response -> {
+                        log.log(Level.INFO, response.toString());
+                        return response;
+                    })
+                    .join();
+        } catch (Exception e) {
+            log.log(Level.SEVERE, e.getMessage(), e);
+        }
+    }
 }

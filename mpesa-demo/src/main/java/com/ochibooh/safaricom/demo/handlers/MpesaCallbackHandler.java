@@ -125,4 +125,34 @@ public class MpesaCallbackHandler {
         }
         return Mono.empty();
     }
+
+    @RequestMapping(
+            path = {"/reversal/result"},
+            method = {RequestMethod.POST},
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public Mono<ResponseEntity<?>> reversalResult(
+            @RequestBody(required = false) String body
+    ){
+        if (body != null && !body.isEmpty()) {
+            log.log(Level.INFO, String.format("Mpesa Transaction Reversal Result body [ %s ]", body));
+        }
+        return Mono.empty();
+    }
+
+    @RequestMapping(
+            path = {"/reversal/timeout"},
+            method = {RequestMethod.POST},
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public Mono<ResponseEntity<?>> reversalTimeout(
+            @RequestBody(required = false) String body
+    ){
+        if (body != null && !body.isEmpty()) {
+            log.log(Level.INFO, String.format("Mpesa Transaction Reversal Timeout body [ %s ]", body));
+        }
+        return Mono.empty();
+    }
 }
