@@ -143,7 +143,7 @@ public class MpesaApiTests {
                     "OAB8B4AHGA",
                     1,
                     "174379",
-                    Mpesa.IdentifierType.RECEIVER_ORGANISATION_IDENTIFIER_ON_MPESA,
+                    Mpesa.IdentifierType.ORGANISATION_SHORT_CODE,
                     "https://51efb1a9.ngrok.io/reversal/timeout",
                     "https://51efb1a9.ngrok.io/reversal/result",
                     "This is just test",
