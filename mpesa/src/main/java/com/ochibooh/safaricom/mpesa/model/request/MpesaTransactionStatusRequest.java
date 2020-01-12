@@ -47,11 +47,13 @@ public class MpesaTransactionStatusRequest implements Serializable {
     @SerializedName("IdentifierType")
     private Integer identifierType;
 
+    @Builder.Default
     @SerializedName("Remarks")
-    private String description;
+    private String description = "";
 
+    @Builder.Default
     @SerializedName("Occasion")
-    private String occasion;
+    private String occasion = "";
 
     @SerializedName("QueueTimeOutURL")
     private String queueTimeoutUrl;

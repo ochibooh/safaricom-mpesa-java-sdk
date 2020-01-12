@@ -44,8 +44,9 @@ public class MpesaAccountBalanceRequest implements Serializable {
     @SerializedName("IdentifierType")
     private Integer identifierType;
 
+    @Builder.Default
     @SerializedName("Remarks")
-    private String description;
+    private String description = "";
 
     @SerializedName("QueueTimeOutURL")
     private String queueTimeoutUrl;

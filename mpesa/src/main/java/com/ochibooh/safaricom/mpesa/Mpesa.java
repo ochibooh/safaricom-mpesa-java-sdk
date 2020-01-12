@@ -372,7 +372,6 @@ public class Mpesa {
                         .transactionId(transactionId)
                         .identifierType(MpesaUtil.getIdentifierType(identifierType))
                         .description(description)
-                        .occasion("")
                         .queueTimeoutUrl(queueTimeoutUrl)
                         .resultUrl(resultUrl)
                         .build();
