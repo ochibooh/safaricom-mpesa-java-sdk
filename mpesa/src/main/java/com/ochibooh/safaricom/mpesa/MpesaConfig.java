@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019
+ * Copyright (c) 2020
  *     Phelix Ochieng(Ochibooh)
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ class MpesaConfig {
     private String endPointAuth = "oauth/v1/generate";
     private String endPointStkPush = "mpesa/stkpush/v1/processrequest";
     private String endPointStkPushStatus = "mpesa/stkpushquery/v1/query";
+    private String endPointAccountBalance = "mpesa/accountbalance/v1/query";
 
     /* http connections */
     private int maxConnections = 400;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019
+ * Copyright (c) 2020
  *     Phelix Ochieng(Ochibooh)
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,18 +40,16 @@ public class DemoHandler {
             method = {RequestMethod.POST, RequestMethod.GET},
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public Mono<ResponseEntity<ErrorResponse>> help() {
-        ResponseEntity<ErrorResponse> responseEntity = httpResponseUtils.setupErrorResponse(HttpStatus.BAD_REQUEST.value(), "For help and any other questions read the manual.", HttpStatus.BAD_REQUEST);
-        return Mono.just(responseEntity);
+    public Mono<ResponseEntity<?>> help() {
+        return Mono.just(httpResponseUtils.setupResponse(ErrorResponse.builder().statusCode(HttpStatus.BAD_REQUEST.value()).statusMessage("For help and any other questions read the manual.").build(), HttpStatus.BAD_REQUEST));
     }
 
     @RequestMapping(
-            path = {"/stk/callback"},
+            path = {"/stk/callback", "/account/result", "/account/timeout"},
             method = {RequestMethod.GET},
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public Mono<ResponseEntity<ErrorResponse>> errorGet() {
-        ResponseEntity<ErrorResponse> responseEntity = httpResponseUtils.setupErrorResponse(HttpStatus.BAD_REQUEST.value(), "Only Http POST requests allowed. RTFM!!!", HttpStatus.BAD_REQUEST);
-        return Mono.just(responseEntity);
+    public Mono<ResponseEntity<?>> errorGet() {
+        return Mono.just(httpResponseUtils.setupResponse(ErrorResponse.builder().statusCode(HttpStatus.BAD_REQUEST.value()).statusMessage("Only Http POST requests allowed. RTFM!!!").build(), HttpStatus.BAD_REQUEST));
     }
 }

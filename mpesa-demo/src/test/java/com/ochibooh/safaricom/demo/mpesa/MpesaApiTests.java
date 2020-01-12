@@ -24,6 +24,7 @@ import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.io.File;
 import java.util.logging.Level;
 
 @Log
@@ -44,7 +45,7 @@ public class MpesaApiTests {
                     "174379",
                     "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919",
                     "0718058057",
-                    "https://dc55dcec.ngrok.io/stk/callback",
+                    "https://51efb1a9.ngrok.io/stk/callback",
                     "test",
                     "one")
                     .thenApplyAsync(response -> {
@@ -55,6 +56,28 @@ public class MpesaApiTests {
                         } catch (Exception e) {
                             log.log(Level.SEVERE, e.getMessage(), e);
                         }
+                        return response;
+                    })
+                    .join();
+        } catch (Exception e) {
+            log.log(Level.SEVERE, e.getMessage(), e);
+        }
+    }
+
+    @Test
+    public void testAccountBalance() {
+        try {
+            Mpesa.getInstance().balance(
+                    new File("/media/ochibooh/data/backup/falcon-backup-spring/misc/tmp/mpesa/cert.cer"),
+                    "testapi113",
+                    "Safaricom007@",
+                    "601514",
+                    Mpesa.IdentifierType.ORGANISATION_SHORT_CODE,
+                    "https://51efb1a9.ngrok.io/account/timeout",
+                    "https://51efb1a9.ngrok.io/account/result",
+                    "This is just test")
+                    .thenApplyAsync(response -> {
+                        log.log(Level.INFO, response.toString());
                         return response;
                     })
                     .join();

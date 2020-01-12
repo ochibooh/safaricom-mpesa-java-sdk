@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019
+ * Copyright (c) 2020
  *     Phelix Ochieng(Ochibooh)
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,7 @@
 
 package com.ochibooh.safaricom.demo.utils;
 
-import com.ochibooh.safaricom.demo.model.response.ErrorResponse;
 import lombok.extern.java.Log;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
@@ -27,11 +25,7 @@ import org.springframework.stereotype.Service;
 @Log
 @Service
 public class HttpResponseUtils {
-    public ResponseEntity<ErrorResponse> setupErrorResponse(@NonNull Integer statusCode, @NonNull String message, @NonNull HttpStatus status) {
-        return new ResponseEntity<>(ErrorResponse.builder().statusCode(statusCode).statusMessage(message).build(), new HttpHeaders(), status);
-    }
-
-    public ResponseEntity<?> setupSuccessResponse(@NonNull Object response, @NonNull HttpStatus status) {
+    public ResponseEntity<?> setupResponse(@NonNull Object response, @NonNull HttpStatus status) {
         return new ResponseEntity<>(response, status);
     }
 }
