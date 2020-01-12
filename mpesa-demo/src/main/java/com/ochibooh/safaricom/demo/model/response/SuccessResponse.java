@@ -14,18 +14,24 @@
  * limitations under the License.
  */
 
-package com.ochibooh.safaricom.demo.utils;
+package com.ochibooh.safaricom.demo.model.response;
 
-import lombok.extern.java.Log;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.lang.NonNull;
-import org.springframework.stereotype.Service;
 
-@Log
-@Service
-public class HttpResponseUtils {
-    public ResponseEntity<?> setupResponse(@NonNull Object response, @NonNull HttpStatus status) {
-        return new ResponseEntity<>(response, status);
-    }
+import java.io.Serializable;
+
+@ToString
+@Setter
+@Getter
+@Builder
+public class SuccessResponse implements Serializable {
+    @Builder.Default
+    private Integer statusCode = HttpStatus.INTERNAL_SERVER_ERROR.value();
+
+    @Builder.Default
+    private String statusMessage = HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase();
 }

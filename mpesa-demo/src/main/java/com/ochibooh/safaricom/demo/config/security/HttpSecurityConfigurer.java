@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019
+ * Copyright (c) 2020
  *     Phelix Ochieng(Ochibooh)
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ public class HttpSecurityConfigurer {
                 .authenticationManager(authManagerConfigurer)
                 .securityContextRepository(securityContextConfigurer)
                 .authorizeExchange()
-                .pathMatchers(HttpMethod.POST, "/help", "/", "/stk/callback").permitAll()
+                .pathMatchers(HttpMethod.POST, "/help", "/", "/stk/callback", "/account/result", "/account/timeout", "/transactionStatus/result", "/transactionStatus/timeout").permitAll()
                 .pathMatchers(HttpMethod.GET, "/help", "/").permitAll()
                 .anyExchange()
                 .authenticated();

@@ -14,18 +14,28 @@
  * limitations under the License.
  */
 
-package com.ochibooh.safaricom.demo.utils;
+package com.ochibooh.safaricom.mpesa.model.response;
 
-import lombok.extern.java.Log;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.lang.NonNull;
-import org.springframework.stereotype.Service;
+import com.google.gson.annotations.SerializedName;
+import lombok.*;
 
-@Log
-@Service
-public class HttpResponseUtils {
-    public ResponseEntity<?> setupResponse(@NonNull Object response, @NonNull HttpStatus status) {
-        return new ResponseEntity<>(response, status);
-    }
+import java.io.Serializable;
+
+@ToString
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class MpesaTransactionStatusResponse implements Serializable {
+    @SerializedName("ResponseCode")
+    private String responseCode;
+
+    @SerializedName("ResponseDescription")
+    private String responseDescription;
+
+    @SerializedName("ConversationID")
+    private String conversationId;
+
+    @SerializedName("OriginatorConversationID")
+    private String originatorConversationId;
 }

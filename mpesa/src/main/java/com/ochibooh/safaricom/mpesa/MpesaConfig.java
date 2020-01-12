@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019
+ * Copyright (c) 2020
  *     Phelix Ochieng(Ochibooh)
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,11 @@ class MpesaConfig {
     private String productionBaseUrl = "https://api.safaricom.co.ke/";
 
     /* mpesa endpoints */
-    private String endPointAuth = "oauth/v1/generate";
-    private String endPointStkPush = "mpesa/stkpush/v1/processrequest";
-    private String endPointStkPushStatus = "mpesa/stkpushquery/v1/query";
+    private String endpointAuth = "oauth/v1/generate";
+    private String endpointStkPush = "mpesa/stkpush/v1/processrequest";
+    private String endpointStkPushStatus = "mpesa/stkpushquery/v1/query";
+    private String endpointAccountBalance = "mpesa/accountbalance/v1/query";
+    private String endpointTransactionStatus = "mpesa/transactionstatus/v1/query";
 
     /* http connections */
     private int maxConnections = 400;
