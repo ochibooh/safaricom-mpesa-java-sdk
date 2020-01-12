@@ -68,7 +68,7 @@ public class MpesaApiTests {
     public void testAccountBalance() {
         try {
             Mpesa.getInstance().balance(
-                    new File("/media/ochibooh/data/backup/falcon-backup-spring/misc/tmp/mpesa/cert.cer"),
+                    new File("/media/ochibooh/data/projects/open-source/safaricom-mpesa/misc/safaricom-mpesa-public-key.cer"),
                     "testapi113",
                     "Safaricom007@",
                     "601514",
