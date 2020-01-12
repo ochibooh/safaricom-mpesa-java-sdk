@@ -297,7 +297,7 @@ public class Mpesa {
             @NonNull String initiatorPassword,
             @NonNull String transactionId,
             @NonNull Integer amount,
-            @NonNull String shortCode,
+            @NonNull String partyA,
             @NonNull IdentifierType identifierType,
             @NonNull String queueTimeoutUrl,
             @NonNull String resultUrl,
@@ -314,7 +314,6 @@ public class Mpesa {
                         .commandId("TransactionReversal")
                         .transactionId(transactionId)
                         .amount(amount)
-                        .receiverParty(shortCode)
                         .identifierType(MpesaUtil.getIdentifierType(identifierType))
                         .description(description)
                         .queueTimeoutUrl(queueTimeoutUrl)
@@ -323,13 +322,21 @@ public class Mpesa {
                 if (occasion != null && !occasion.isEmpty()) {
                     body.setOccasion(occasion);
                 }
+                if (identifierType == IdentifierType.MSISDN) {
+                    String pn = MpesaUtil.formatPhone("KE", partyA);
+                    if (pn == null || pn.isEmpty()) {
+                        throw new Exception(String.format("Invalid phone number [ country=KE, phone=%s ]", partyA));
+                    }
+                    body.setReceiverParty(pn);
+                } else {
+                    body.setReceiverParty(partyA);
+                }
                 RequestBuilder request = new RequestBuilder(HttpMethod.POST.name())
                         .setUrl(getUrl(config.getEndpointAccountBalance()))
                         .addHeader("Authorization", String.format("Bearer %s", token))
                         .addHeader("Content-Type", "application/json")
                         .addHeader("Cache-Control", "no-cache")
                         .setBody(gson.toJson(body));
-                MpesaUtil.writeLog(Mpesa.environment, Level.INFO, body.toString());
                 client.executeRequest(request.build())
                         .toCompletableFuture()
                         .thenApplyAsync(response -> {
