@@ -25,10 +25,10 @@ class MpesaConfig {
     private String productionBaseUrl = "https://api.safaricom.co.ke/";
 
     /* mpesa endpoints */
-    private String endPointAuth = "oauth/v1/generate";
-    private String endPointStkPush = "mpesa/stkpush/v1/processrequest";
-    private String endPointStkPushStatus = "mpesa/stkpushquery/v1/query";
-    private String endPointAccountBalance = "mpesa/accountbalance/v1/query";
+    private String endpointAuth = "oauth/v1/generate";
+    private String endpointStkPush = "mpesa/stkpush/v1/processrequest";
+    private String endpointStkPushStatus = "mpesa/stkpushquery/v1/query";
+    private String endpointAccountBalance = "mpesa/accountbalance/v1/query";
 
     /* http connections */
     private int maxConnections = 400;

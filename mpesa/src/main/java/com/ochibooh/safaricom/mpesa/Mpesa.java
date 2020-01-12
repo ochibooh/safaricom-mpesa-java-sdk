@@ -145,7 +145,7 @@ public class Mpesa {
                 try (AsyncHttpClient client = asyncHttpClient(httpClientConfig())) {
                     Gson gson = new Gson();
                     RequestBuilder request = new RequestBuilder(HttpMethod.GET.name())
-                            .setUrl(getUrl(config.getEndPointAuth()))
+                            .setUrl(getUrl(config.getEndpointAuth()))
                             .addHeader("Authorization", String.format("Basic %s", Base64.getEncoder().encodeToString(String.format("%s:%s", Mpesa.key, Mpesa.secret).getBytes(StandardCharsets.ISO_8859_1))))
                             .addHeader("Cache-Control", "no-cache")
                             .addQueryParam("grant_type", "client_credentials");
@@ -224,7 +224,7 @@ public class Mpesa {
                         .description(description)
                         .build();
                 RequestBuilder request = new RequestBuilder(HttpMethod.POST.name())
-                        .setUrl(getUrl(config.getEndPointStkPush()))
+                        .setUrl(getUrl(config.getEndpointStkPush()))
                         .addHeader("Authorization", String.format("Bearer %s", token))
                         .addHeader("Content-Type", "application/json")
                         .addHeader("Cache-Control", "no-cache")
@@ -267,7 +267,7 @@ public class Mpesa {
                         .checkoutRequestId(checkoutRequestId)
                         .build();
                 RequestBuilder request = new RequestBuilder(HttpMethod.POST.name())
-                        .setUrl(getUrl(config.getEndPointStkPushStatus()))
+                        .setUrl(getUrl(config.getEndpointStkPushStatus()))
                         .addHeader("Authorization", String.format("Bearer %s", token))
                         .addHeader("Content-Type", "application/json")
                         .addHeader("Cache-Control", "no-cache")
@@ -322,7 +322,7 @@ public class Mpesa {
                         .resultUrl(resultUrl)
                         .build();
                 RequestBuilder request = new RequestBuilder(HttpMethod.POST.name())
-                        .setUrl(getUrl(config.getEndPointAccountBalance()))
+                        .setUrl(getUrl(config.getEndpointAccountBalance()))
                         .addHeader("Authorization", String.format("Bearer %s", token))
                         .addHeader("Content-Type", "application/json")
                         .addHeader("Cache-Control", "no-cache")
