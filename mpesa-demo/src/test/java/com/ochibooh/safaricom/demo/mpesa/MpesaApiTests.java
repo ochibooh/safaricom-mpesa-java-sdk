@@ -46,13 +46,36 @@ public class MpesaApiTests {
                     "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919",
                     "0718058057",
                     "https://51efb1a9.ngrok.io/stk/callback",
-                    "test",
+                    "account-number",
                     "one")
                     .thenApplyAsync(response -> {
                         try {
                             log.log(Level.INFO, response.toString());
-                            Thread.sleep(70000);
-                            log.log(Level.INFO, Mpesa.getInstance().stkPushStatus("174379", "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919", response.getCheckoutRequestId()).join().toString());
+                            if (response.getResponseCode().equals("0")) {
+                                Thread.sleep(60000);
+                                log.log(Level.INFO, Mpesa.getInstance().stkPushStatus("174379", "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919", response.getCheckoutRequestId()).join().toString());
+                            }
+                        } catch (Exception e) {
+                            log.log(Level.SEVERE, e.getMessage(), e);
+                        }
+                        return response;
+                    })
+                    .join();
+            Mpesa.getInstance().stkPush(
+                    Mpesa.StkPushType.BUY_GOODS,
+                    "174379",
+                    "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919",
+                    "0718058057",
+                    "https://51efb1a9.ngrok.io/stk/callback",
+                    "ref-number",
+                    "one")
+                    .thenApplyAsync(response -> {
+                        try {
+                            log.log(Level.INFO, response.toString());
+                            if (response.getResponseCode().equals("0")) {
+                                Thread.sleep(60000);
+                                log.log(Level.INFO, Mpesa.getInstance().stkPushStatus("174379", "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919", response.getCheckoutRequestId()).join().toString());
+                            }
                         } catch (Exception e) {
                             log.log(Level.SEVERE, e.getMessage(), e);
                         }
@@ -69,9 +92,9 @@ public class MpesaApiTests {
         try {
             Mpesa.getInstance().balance(
                     new File("/media/ochibooh/data/projects/open-source/safaricom-mpesa/misc/safaricom-mpesa-public-key.cer"),
-                    "testapi113",
-                    "Safaricom007@",
-                    "601514",
+                    "ochibooh",
+                    "Ochibooh1994",
+                    "600432",
                     Mpesa.IdentifierType.ORGANISATION_SHORT_CODE,
                     "https://51efb1a9.ngrok.io/account/timeout",
                     "https://51efb1a9.ngrok.io/account/result",

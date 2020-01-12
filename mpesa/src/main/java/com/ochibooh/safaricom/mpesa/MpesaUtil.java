@@ -55,6 +55,17 @@ class MpesaUtil {
         }
     }
 
+    public static int getIdentifierType(@NonNull Mpesa.IdentifierType identifierType) {
+        AtomicReference<Integer> res = new AtomicReference<>(99);
+        switch (identifierType) {
+            case MSISDN: res.set(1); break;
+            case TILL_NUMBER: res.set(2); break;
+            case ORGANISATION_SHORT_CODE: res.set(4); break;
+            default: res.set(99); break;
+        }
+        return res.get();
+    }
+
     public static String formatPhone(@NonNull String country, @NonNull String phone) throws Exception {
         AtomicReference<String> res = new AtomicReference<>(null);
         PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();

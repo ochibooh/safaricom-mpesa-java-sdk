@@ -190,7 +190,7 @@ public class Mpesa {
     /*
     * Stk push simulator
     *
-    * NOTE :: CustomerPayBillOnline - reference to be account number, CustomerBuyGoodsOnline - to be reference number
+    * NOTE :: CustomerPayBillOnline - reference to be account number ie phone number, CustomerBuyGoodsOnline - to be reference number
     * */
     public CompletableFuture<MpesaStkPushResponse> stkPush(
             @NonNull StkPushType type,
@@ -316,7 +316,7 @@ public class Mpesa {
                         .credential(MpesaUtil.initiatorCredentials(mpesaPublicCertificate, initiatorPassword))
                         .commandId("AccountBalance")
                         .partyA(shortCode)
-                        .identifierType(identifierType == IdentifierType.MSISDN ? 0 : identifierType == IdentifierType.TILL_NUMBER ? 1 : identifierType == IdentifierType.ORGANISATION_SHORT_CODE ? 4 : 99)
+                        .identifierType(MpesaUtil.getIdentifierType(identifierType))
                         .description(description)
                         .queueTimeoutUrl(queueTimeoutUrl)
                         .resultUrl(resultUrl)
