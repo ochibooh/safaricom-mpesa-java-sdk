@@ -45,7 +45,7 @@ public class DemoHandler {
     }
 
     @RequestMapping(
-            path = {"/stk/callback", "/account/result", "/account/timeout", "/transactionStatus/result", "/transactionStatus/timeout"},
+            path = {"/stk/callback", "/account/result", "/account/timeout", "/transactionStatus/result", "/transactionStatus/timeout", "/reversal/result", "/reversal/timeout"},
             method = {RequestMethod.GET},
             produces = MediaType.APPLICATION_JSON_VALUE
     )

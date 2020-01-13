@@ -59,7 +59,7 @@ public class HttpSecurityConfigurer {
                 .authenticationManager(authManagerConfigurer)
                 .securityContextRepository(securityContextConfigurer)
                 .authorizeExchange()
-                .pathMatchers(HttpMethod.POST, "/help", "/", "/stk/callback", "/account/result", "/account/timeout", "/transactionStatus/result", "/transactionStatus/timeout").permitAll()
+                .pathMatchers(HttpMethod.POST, "/help", "/", "/stk/callback", "/account/result", "/account/timeout", "/transactionStatus/result", "/transactionStatus/timeout", "/reversal/result", "/reversal/timeout").permitAll()
                 .pathMatchers(HttpMethod.GET, "/help", "/").permitAll()
                 .anyExchange()
                 .authenticated();

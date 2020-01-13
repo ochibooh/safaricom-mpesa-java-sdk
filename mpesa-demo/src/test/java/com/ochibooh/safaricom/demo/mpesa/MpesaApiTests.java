@@ -18,6 +18,7 @@ package com.ochibooh.safaricom.demo.mpesa;
 
 import com.ochibooh.safaricom.mpesa.Mpesa;
 import lombok.extern.java.Log;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -88,12 +89,30 @@ public class MpesaApiTests {
     }
 
     @Test
+    public void testC2BRegisterUrl() {
+        try {
+            Mpesa.getInstance().registerC2BUrl(
+                    "603040",
+                    Mpesa.C2BUrlResponseType.COMPLETED,
+                    "https://51efb1a9.ngrok.io/c2b/confirmation",
+                    "https://51efb1a9.ngrok.io/c2b/validation")
+                    .thenApplyAsync(response -> {
+                        log.log(Level.INFO, response.toString());
+                        return response;
+                    })
+                    .join();
+        } catch (Exception e) {
+            log.log(Level.SEVERE, e.getMessage(), e);
+        }
+    }
+
+    @Test
     public void testAccountBalance() {
         try {
             Mpesa.getInstance().balance(
                     new File("/media/ochibooh/data/projects/open-source/safaricom-mpesa/misc/safaricom-mpesa-public-key.cer"),
                     "testapi113",
-                    "Safaricom007@",
+                    RandomStringUtils.randomAlphanumeric(20),
                     "603040",
                     Mpesa.IdentifierType.ORGANISATION_SHORT_CODE,
                     "https://51efb1a9.ngrok.io/account/timeout",
@@ -115,12 +134,37 @@ public class MpesaApiTests {
             Mpesa.getInstance().transactionStatus(
                     new File("/media/ochibooh/data/projects/open-source/safaricom-mpesa/misc/safaricom-mpesa-public-key.cer"),
                     "testapi113",
-                    "Safaricom007@",
+                    RandomStringUtils.randomAlphanumeric(20),
                     "OAB8B4AHGA",
                     "0718058057",
                     Mpesa.IdentifierType.MSISDN,
                     "https://51efb1a9.ngrok.io/transactionStatus/timeout",
                     "https://51efb1a9.ngrok.io/transactionStatus/result",
+                    "This is just test",
+                    "This is just optional")
+                    .thenApplyAsync(response -> {
+                        log.log(Level.INFO, response.toString());
+                        return response;
+                    })
+                    .join();
+        } catch (Exception e) {
+            log.log(Level.SEVERE, e.getMessage(), e);
+        }
+    }
+
+    @Test
+    public void testReversal() {
+        try {
+            Mpesa.getInstance().reversal(
+                    new File("/media/ochibooh/data/projects/open-source/safaricom-mpesa/misc/safaricom-mpesa-public-key.cer"),
+                    "testapi113",
+                    RandomStringUtils.randomAlphanumeric(20),
+                    "OAB8B4AHGA",
+                    1,
+                    "174379",
+                    Mpesa.IdentifierType.ORGANISATION_SHORT_CODE,
+                    "https://51efb1a9.ngrok.io/reversal/timeout",
+                    "https://51efb1a9.ngrok.io/reversal/result",
                     "This is just test",
                     "This is just optional")
                     .thenApplyAsync(response -> {

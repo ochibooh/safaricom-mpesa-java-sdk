@@ -17,10 +17,7 @@
 package com.ochibooh.safaricom.mpesa;
 
 import com.google.gson.Gson;
-import com.ochibooh.safaricom.mpesa.model.request.MpesaAccountBalanceRequest;
-import com.ochibooh.safaricom.mpesa.model.request.MpesaStkPushRequest;
-import com.ochibooh.safaricom.mpesa.model.request.MpesaStkPushStatusRequest;
-import com.ochibooh.safaricom.mpesa.model.request.MpesaTransactionStatusRequest;
+import com.ochibooh.safaricom.mpesa.model.request.*;
 import com.ochibooh.safaricom.mpesa.model.response.*;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.ssl.SslContextBuilder;
@@ -55,7 +52,11 @@ public class Mpesa {
     }
 
     public enum IdentifierType {
-        MSISDN, TILL_NUMBER, ORGANISATION_SHORT_CODE
+        MSISDN, TILL_NUMBER, ORGANISATION_SHORT_CODE, RECEIVER_ORGANISATION_IDENTIFIER_ON_MPESA
+    }
+
+    public enum C2BUrlResponseType {
+        CANCELED, COMPLETED
     }
 
     private static Environment environment = Environment.SANDBOX;
@@ -294,8 +295,67 @@ public class Mpesa {
         return CompletableFuture.supplyAsync(res::get);
     }
 
-    public String reversal() {
-        return "";
+    public CompletableFuture<MpesaReversalResponse> reversal(
+            @NonNull File mpesaPublicCertificate,
+            @NonNull String initiatorName,
+            @NonNull String initiatorPassword,
+            @NonNull String transactionId,
+            @NonNull Integer amount,
+            @NonNull String partyA,
+            @NonNull IdentifierType identifierType,
+            @NonNull String queueTimeoutUrl,
+            @NonNull String resultUrl,
+            @NonNull String description,
+            String occasion) throws Exception {
+        AtomicReference<MpesaReversalResponse> res = new AtomicReference<>(MpesaReversalResponse.builder().build());
+        String token = authenticate();
+        if (token != null && !token.isEmpty()) {
+            try (AsyncHttpClient client = asyncHttpClient(httpClientConfig())) {
+                Gson gson = new Gson();
+                MpesaReversalRequest body = MpesaReversalRequest.builder()
+                        .initiator(initiatorName)
+                        .credential(MpesaUtil.initiatorCredentials(mpesaPublicCertificate, initiatorPassword))
+                        .commandId("TransactionReversal")
+                        .transactionId(transactionId)
+                        .amount(amount)
+                        .identifierType(MpesaUtil.getIdentifierType(identifierType))
+                        .description(description)
+                        .queueTimeoutUrl(queueTimeoutUrl)
+                        .resultUrl(resultUrl)
+                        .build();
+                if (occasion != null && !occasion.isEmpty()) {
+                    body.setOccasion(occasion);
+                }
+                if (identifierType == IdentifierType.MSISDN) {
+                    String pn = MpesaUtil.formatPhone("KE", partyA);
+                    if (pn == null || pn.isEmpty()) {
+                        throw new Exception(String.format("Invalid phone number [ country=KE, phone=%s ]", partyA));
+                    }
+                    body.setReceiverParty(pn);
+                } else {
+                    body.setReceiverParty(partyA);
+                }
+                RequestBuilder request = new RequestBuilder(HttpMethod.POST.name())
+                        .setUrl(getUrl(config.getEndpointAccountBalance()))
+                        .addHeader("Authorization", String.format("Bearer %s", token))
+                        .addHeader("Content-Type", "application/json")
+                        .addHeader("Cache-Control", "no-cache")
+                        .setBody(gson.toJson(body));
+                client.executeRequest(request.build())
+                        .toCompletableFuture()
+                        .thenApplyAsync(response -> {
+                            MpesaUtil.writeLog(Mpesa.environment, Level.INFO, String.format("Mpesa Reversal response [ statusCode=%s, statusMessage=%s, body=%s ]", response.getStatusCode(), response.getStatusText(),
+                                    gson.toJson(gson.fromJson(response.getResponseBody(), Object.class))));
+                            /* todo :: check on response*/
+                            return res.get();
+                        })
+                        .thenAcceptAsync(u -> MpesaUtil.writeLog(Mpesa.environment, Level.FINE, String.valueOf(u))).join();
+            }
+
+        } else {
+            throw new Exception("Invalid authorization token. Confirm if the consumer key and consumer secret provided are valid");
+        }
+        return CompletableFuture.supplyAsync(res::get);
     }
 
     public CompletableFuture<MpesaAccountBalanceResponse> balance(
@@ -414,7 +474,46 @@ public class Mpesa {
         return CompletableFuture.supplyAsync(res::get);
     }
 
-    public String registerUrl() {
-        return "";
+    public CompletableFuture<MpesaC2BUrlResponse> registerC2BUrl(
+            @NonNull String shortCode,
+            @NonNull C2BUrlResponseType responseType,
+            @NonNull String confirmationUrl,
+            @NonNull String validationUrl) throws Exception {
+        AtomicReference<MpesaC2BUrlResponse> res = new AtomicReference<>(MpesaC2BUrlResponse.builder().build());
+        String token = authenticate();
+        if (token != null && !token.isEmpty()) {
+            try (AsyncHttpClient client = asyncHttpClient(httpClientConfig())) {
+                Gson gson = new Gson();
+                MpesaC2BUrlRequest body = MpesaC2BUrlRequest.builder()
+                        .shortCode(shortCode)
+                        .responseType(responseType == C2BUrlResponseType.COMPLETED ? "Completed" : responseType == C2BUrlResponseType.CANCELED ? "Canceled" : "")
+                        .confirmationUrl(confirmationUrl != null && !confirmationUrl.isEmpty() ? confirmationUrl : "")
+                        .validationUrl(validationUrl != null && !validationUrl.isEmpty() ? validationUrl : "")
+                        .build();
+                RequestBuilder request = new RequestBuilder(HttpMethod.POST.name())
+                        .setUrl(getUrl(config.getEndpointC2BUrl()))
+                        .addHeader("Authorization", String.format("Bearer %s", token))
+                        .addHeader("Content-Type", "application/json")
+                        .addHeader("Cache-Control", "no-cache")
+                        .setBody(gson.toJson(body));
+                client.executeRequest(request.build())
+                        .toCompletableFuture()
+                        .thenApplyAsync(response -> {
+                            MpesaUtil.writeLog(Mpesa.environment, Level.INFO, String.format("Mpesa C2B Register URL response [ statusCode=%s, statusMessage=%s, body=%s ]", response.getStatusCode(), response.getStatusText(),
+                                    gson.toJson(gson.fromJson(response.getResponseBody(), Object.class))));
+                            if (response.getStatusCode() == 200 && response.getResponseBody() != null && !response.getResponseBody().isEmpty()) {
+                                res.set(gson.fromJson(response.getResponseBody(), MpesaC2BUrlResponse.class));
+                            } else {
+                                MpesaErrorResponse errorResponse = gson.fromJson(response.getResponseBody(), MpesaErrorResponse.class);
+                                res.set(MpesaC2BUrlResponse.builder().responseDescription(errorResponse.getErrorMessage() != null ? errorResponse.getErrorMessage() : response.getStatusText()).originatorConversationId(errorResponse.getRequestId()).build());
+                            }
+                            return res.get();
+                        })
+                        .thenAcceptAsync(u -> MpesaUtil.writeLog(Mpesa.environment, Level.FINE, String.valueOf(u))).join();
+            }
+        } else {
+            throw new Exception("Invalid authorization token. Confirm if the consumer key and consumer secret provided are valid");
+        }
+        return CompletableFuture.supplyAsync(res::get);
     }
 }
