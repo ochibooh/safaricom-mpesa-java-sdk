@@ -89,6 +89,24 @@ public class MpesaApiTests {
     }
 
     @Test
+    public void testC2BRegisterUrl() {
+        try {
+            Mpesa.getInstance().registerC2BUrl(
+                    "603040",
+                    Mpesa.C2BUrlResponseType.COMPLETED,
+                    "https://51efb1a9.ngrok.io/c2b/confirmation",
+                    "https://51efb1a9.ngrok.io/c2b/validation")
+                    .thenApplyAsync(response -> {
+                        log.log(Level.INFO, response.toString());
+                        return response;
+                    })
+                    .join();
+        } catch (Exception e) {
+            log.log(Level.SEVERE, e.getMessage(), e);
+        }
+    }
+
+    @Test
     public void testAccountBalance() {
         try {
             Mpesa.getInstance().balance(

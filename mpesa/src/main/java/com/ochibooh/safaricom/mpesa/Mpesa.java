@@ -55,6 +55,10 @@ public class Mpesa {
         MSISDN, TILL_NUMBER, ORGANISATION_SHORT_CODE, RECEIVER_ORGANISATION_IDENTIFIER_ON_MPESA
     }
 
+    public enum C2BUrlResponseType {
+        CANCELED, COMPLETED
+    }
+
     private static Environment environment = Environment.SANDBOX;
 
     private static String key = null;
@@ -342,6 +346,7 @@ public class Mpesa {
                         .thenApplyAsync(response -> {
                             MpesaUtil.writeLog(Mpesa.environment, Level.INFO, String.format("Mpesa Reversal response [ statusCode=%s, statusMessage=%s, body=%s ]", response.getStatusCode(), response.getStatusText(),
                                     gson.toJson(gson.fromJson(response.getResponseBody(), Object.class))));
+                            /* todo :: check on response*/
                             return res.get();
                         })
                         .thenAcceptAsync(u -> MpesaUtil.writeLog(Mpesa.environment, Level.FINE, String.valueOf(u))).join();
@@ -469,7 +474,46 @@ public class Mpesa {
         return CompletableFuture.supplyAsync(res::get);
     }
 
-    public String registerC2BUrl() {
-        return "";
+    public CompletableFuture<MpesaC2BUrlResponse> registerC2BUrl(
+            @NonNull String shortCode,
+            @NonNull C2BUrlResponseType responseType,
+            @NonNull String confirmationUrl,
+            @NonNull String validationUrl) throws Exception {
+        AtomicReference<MpesaC2BUrlResponse> res = new AtomicReference<>(MpesaC2BUrlResponse.builder().build());
+        String token = authenticate();
+        if (token != null && !token.isEmpty()) {
+            try (AsyncHttpClient client = asyncHttpClient(httpClientConfig())) {
+                Gson gson = new Gson();
+                MpesaC2BUrlRequest body = MpesaC2BUrlRequest.builder()
+                        .shortCode(shortCode)
+                        .responseType(responseType == C2BUrlResponseType.COMPLETED ? "Completed" : responseType == C2BUrlResponseType.CANCELED ? "Canceled" : "")
+                        .confirmationUrl(confirmationUrl != null && !confirmationUrl.isEmpty() ? confirmationUrl : "")
+                        .validationUrl(validationUrl != null && !validationUrl.isEmpty() ? validationUrl : "")
+                        .build();
+                RequestBuilder request = new RequestBuilder(HttpMethod.POST.name())
+                        .setUrl(getUrl(config.getEndpointC2BUrl()))
+                        .addHeader("Authorization", String.format("Bearer %s", token))
+                        .addHeader("Content-Type", "application/json")
+                        .addHeader("Cache-Control", "no-cache")
+                        .setBody(gson.toJson(body));
+                client.executeRequest(request.build())
+                        .toCompletableFuture()
+                        .thenApplyAsync(response -> {
+                            MpesaUtil.writeLog(Mpesa.environment, Level.INFO, String.format("Mpesa C2B Register URL response [ statusCode=%s, statusMessage=%s, body=%s ]", response.getStatusCode(), response.getStatusText(),
+                                    gson.toJson(gson.fromJson(response.getResponseBody(), Object.class))));
+                            if (response.getStatusCode() == 200 && response.getResponseBody() != null && !response.getResponseBody().isEmpty()) {
+                                res.set(gson.fromJson(response.getResponseBody(), MpesaC2BUrlResponse.class));
+                            } else {
+                                MpesaErrorResponse errorResponse = gson.fromJson(response.getResponseBody(), MpesaErrorResponse.class);
+                                res.set(MpesaC2BUrlResponse.builder().responseDescription(errorResponse.getErrorMessage() != null ? errorResponse.getErrorMessage() : response.getStatusText()).originatorConversationId(errorResponse.getRequestId()).build());
+                            }
+                            return res.get();
+                        })
+                        .thenAcceptAsync(u -> MpesaUtil.writeLog(Mpesa.environment, Level.FINE, String.valueOf(u))).join();
+            }
+        } else {
+            throw new Exception("Invalid authorization token. Confirm if the consumer key and consumer secret provided are valid");
+        }
+        return CompletableFuture.supplyAsync(res::get);
     }
 }
