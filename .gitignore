@@ -4,3 +4,4 @@ mpesa/*.iml
 mpesa/target/*
 mpesa-demo/*.iml
 mpesa-demo/target/*
+misc/*
