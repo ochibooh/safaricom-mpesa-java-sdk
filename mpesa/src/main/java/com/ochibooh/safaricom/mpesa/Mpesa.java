@@ -469,7 +469,7 @@ public class Mpesa {
         return CompletableFuture.supplyAsync(res::get);
     }
 
-    public String registerUrl() {
+    public String registerC2BUrl() {
         return "";
     }
 }
