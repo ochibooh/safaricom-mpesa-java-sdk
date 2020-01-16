@@ -82,10 +82,10 @@ class MpesaUtil {
         return Base64.getEncoder().encodeToString(String.format("%s%s%s", shortCode, key, timestamp).getBytes(StandardCharsets.ISO_8859_1));
     }
 
-    public static String initiatorCredentials(@NonNull File mpesaCertificatePath, @NonNull String password) throws Exception {
+    public static String initiatorCredentials(@NonNull File mpesaCertificate, @NonNull String password) throws Exception {
         Security.addProvider(new BouncyCastleProvider());
         Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding", "BC");
-        FileInputStream fin = new FileInputStream(mpesaCertificatePath);
+        FileInputStream fin = new FileInputStream(mpesaCertificate);
         X509Certificate certificate = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(fin);
         PublicKey publicKey = certificate.getPublicKey();
         cipher.init(Cipher.ENCRYPT_MODE, publicKey);
